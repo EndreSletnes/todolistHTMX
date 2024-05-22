@@ -1,0 +1,76 @@
+{{ block "index" . }}
+<!DOCTYPE html>
+<html lang="no">
+
+<head>
+	<meta charset="UTF-8">
+	<title>Your Todolist</title>
+	<script src="https://unpkg.com/htmx.org@1.9.12"
+		integrity="sha384-ujb1lZYygJmzgSwoxRggbCHcjc0rB2XoQrxeTUQyRjrOnlCoYta87iKBWq3EsdM2"
+		crossorigin="anonymous"></script>
+	<link rel="stylesheet" href="/static/main.css">
+</head>
+
+<body>
+	<header class="flex items-center justify-center">
+		<h1 class="font-bold m-5 text-xl">TodoList Go+HTMX</h1>
+	</header>
+	<form hx-post="/addtask" hx-target="#todotasks" hx-swap="beforeend" class="flex justify-center">
+		<input type="text" name="name" placeholder="Taskname" class="input">
+		<input type="text" name="description" placeholder="Description" class="input">
+		<button type="submit" class="p-3 rounded border border-gray-300">Add new task</button>
+	</form>
+	{{ template "tasks" . }}
+</body>
+
+</html>
+{{ end }}
+
+{{ block "tasks" . }}
+<div id="tasks" class="grid grid-cols-3 justify-center h-min">
+	<div id="todotasks" class="flex flex-col place-items-center h-min p-8 m-5
+				bg-gray-100 rounded">
+		<h1 class="font-bold">Todo</h1>
+		{{range .TodoTasks}}
+		{{ template "task" . }}
+		{{end}}
+	</div>
+	<div id="doingtasks" class=" flex flex-col place-items-center h-min p-8 m-5
+				bg-blue-100 rounded">
+		<h1 class="font-bold">Doing</h1>
+		{{range .DoingTasks}}
+		{{ template "task" . }}
+		{{end}}
+	</div>
+	<div id="donetasks" class="flex flex-col place-items-center h-min p-8 m-5
+				bg-green-100 rounded">
+		<h1 class="font-bold">Done</h1>
+		{{range .DoneTasks}}
+		{{ template "task" . }}
+		{{end}}
+	</div>
+</div>
+{{ end }}
+
+{{ block "task" . }}
+<div id="task-{{ .Id }}" class="flex flex-col w-full
+	bg-gray-50 m-5 p-1 border border-black rounded">
+	<span class="m-2">{{.Name}}</span>
+	{{ if eq .Status 0 }}
+	<button hx-put="/changeStatus/{{ .Id }}" hx-target="#tasks" hx-swap="outerHTML"
+		class="ml-auto bg-blue-300 p-1 rounded">
+		Start Task
+	</button>
+	{{ else if eq .Status 1 }}
+	<button hx-put="/changeStatus/{{ .Id }}" hx-target="#tasks" hx-swap="outerHTML"
+		class="ml-auto bg-green-300 p-1 rounded">
+		Finish Task
+	</button>
+	{{ else }}
+	<button hx-delete="/deleteTask/{{ .Id }}" hx-target="#task-{{ .Id }}" hx-swap="outerHTML"
+		class="ml-auto bg-red-300 p-1 rounded">
+		Remove
+	</button>
+	{{ end }}
+</div>
+{{ end }}
